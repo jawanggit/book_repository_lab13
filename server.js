@@ -31,13 +31,42 @@ app.get(('/searches/new'), (req,resp)=>{
   resp.render('pages/searches/new')
 })
 
-//https://www.googleapis.com/books/v1/volumes?q=isbn:<your_isbn_here>
 
 app.use((error,request,response,next) => {
   console.log(error);
   response.status(500).send("Sorry, something went wrong")
 
 });
+
+app.post('/searches', (req, res) => {
+  // console.log(req.body);
+  const url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${req.body.search_entry}`
+  console.log(url)
+  superagent.get(url)
+  .then(data =>{
+      console.log(data.body)
+      // return new BookInfo(data)
+   
+    
+    res.status(200).send("Hello");
+  })
+  .catch((e) => {
+    console.log(e)
+    res.status(500).send('So sorry, issue with post');
+  });
+ 
+});
+
+
+function BookInfo(data){
+  this.title = data.items[0].volumeInfo.title
+  this.image = data.items[0].imageLinks.thumbnail
+  this.author = data.items[0].volumeInfo.authors[0]
+  this.description = data.items[0].volumeInfo.description
+  this.isbn = data.items[0].volumeInfo.industryIdentifiers[0].identifier
+  this.bookshelf = data.items[0].volumeInfo.categories[0] //Fiction
+}
+
 
 app.listen(PORT, () =>{
   console.log(`Server is up on port ${PORT}.`);
