@@ -8,7 +8,6 @@ const pg = require('pg')
 const superagent = require('superagent');
 const morgan = require('morgan');
 const PORT = process.env.PORT;
-// const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
 
 //Create an "instance" of express as our app
 const app = express();
@@ -24,13 +23,54 @@ app.use(express.urlencoded({ extended: true }))
 
 
 //test route
-app.get('/hello',(req, resp)=>{
-    
-    resp.render('index');
+app.get('/hello',(req, resp)=>{  
+    resp.render('pages/index');
+})
+
+app.get(('/searches/new'), (req,resp)=>{
+  resp.render('pages/searches/new')
 })
 
 
+app.use((error,request,response,next) => {
+  console.log(error);
+  response.status(500).send("Sorry, something went wrong")
 
+});
+
+app.post('/searches', (req, res) => {
+  // console.log(req.body);
+  const url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${req.body.search_entry}`
+  console.log(url)
+  superagent.get(url)
+  .then(data =>{
+      console.log(data.body)
+      // return new BookInfo(data)
+   
+    
+    res.status(200).send("Hello");
+  })
+  .catch((e) => {
+    console.log(e)
+    res.status(500).send('So sorry, issue with post');
+  });
+ 
+});
+
+
+function BookInfo(data){
+  this.title = data.items[0].volumeInfo.title
+  this.image = data.items[0].imageLinks.thumbnail
+  this.author = data.items[0].volumeInfo.authors[0]
+  this.description = data.items[0].volumeInfo.description
+  this.isbn = data.items[0].volumeInfo.industryIdentifiers[0].identifier
+  this.bookshelf = data.items[0].volumeInfo.categories[0] //Fiction
+}
+
+
+app.listen(PORT, () =>{
+  console.log(`Server is up on port ${PORT}.`);
+})
 
 // //create a SQL client connection
 // const client = new pg.Client(process.env.DATABASE_URL);
@@ -52,82 +92,78 @@ app.get('/hello',(req, resp)=>{
 ///////////////////////////////////////////
 
 
-app.get('/location', (request,response) => {
+// app.get('/location', (request,response) => {
   
   
-  //check table for requested city 
+//   //check table for requested city 
   
-  const query = [request.query.city]
-  const SQL = 'SELECT * FROM city_explorer_1 WHERE cityname = $1'
-  client.query(SQL,query)
-  .then (results => {
-    console.log("received input")
-    //save results to finalData using object Location
-    // console.log(results.rows[0])
-    if (results.rows[0]){
-      finalDataObj = new Location(results.rows[0], request.query.city)
-      // console.log(searchedLocation.cityname);
-      // console.log(finalDataObj)
-      console.log("msg: sent info using SQL info")
-      response.status(200).json(finalDataObj)
+//   const query = [request.query.city]
+//   const SQL = 'SELECT * FROM city_explorer_1 WHERE cityname = $1'
+//   client.query(SQL,query)
+//   .then (results => {
+//     console.log("received input")
+//     //save results to finalData using object Location
+//     // console.log(results.rows[0])
+//     if (results.rows[0]){
+//       finalDataObj = new Location(results.rows[0], request.query.city)
+//       // console.log(searchedLocation.cityname);
+//       // console.log(finalDataObj)
+//       console.log("msg: sent info using SQL info")
+//       response.status(200).json(finalDataObj)
 
-    }else{
+//     }else{
        
-      console.log('else statement ran')
-      const url = `https://us1.locationiq.com/v1/search.php`;
+//       console.log('else statement ran')
+//       const url = `https://us1.locationiq.com/v1/search.php`;
       
-      let queryObject = {
-        key: process.env.GEOCODE_API_KEY,
-        format: 'json',
-        q: request.query.city
-      }
-      console.log(url)
-      superagent.get(url)
-      .query(queryObject)
-      .then(data =>{
-        console.log("query sent")
-        console.log(data.body[0]);
-        finalDataObj = new Location(data.body[0], request.query.city);
+//       let queryObject = {
+//         key: process.env.GEOCODE_API_KEY,
+//         format: 'json',
+//         q: request.query.city
+//       }
+//       console.log(url)
+//       superagent.get(url)
+//       .query(queryObject)
+//       .then(data =>{
+//         console.log("query sent")
+//         console.log(data.body[0]);
+//         finalDataObj = new Location(data.body[0], request.query.city);
        
               
-        //send requested information to front-end
-        response.status(200).send(finalDataObj);
+//         //send requested information to front-end
+//         response.status(200).send(finalDataObj);
         
-        //after saving object to an array of objects, save/insert request to SQL table
-        let cityname = request.query.city
-        let lat = finalDataObj.latitude
-        let lon = finalDataObj.longitude
-        let display_name = finalDataObj.formatted_query
-        let safeQuery = [cityname, lat, lon, display_name]
+//         //after saving object to an array of objects, save/insert request to SQL table
+//         let cityname = request.query.city
+//         let lat = finalDataObj.latitude
+//         let lon = finalDataObj.longitude
+//         let display_name = finalDataObj.formatted_query
+//         let safeQuery = [cityname, lat, lon, display_name]
         
-        let SQL = 'INSERT INTO city_explorer_1 (cityname, lat, lon, display_name) VALUES ($1, $2, $3, $4) RETURNING *'
-        console.log('writing to table')
-        //safeQuery protects against SQL injection and merges $1 with safeQuery array
-        client.query(SQL, safeQuery)
-          .then(results => {
-            response.status(200).send(results);
-          })
-          .catch(error => {response.status(500).send(error)});  
-      })
+//         let SQL = 'INSERT INTO city_explorer_1 (cityname, lat, lon, display_name) VALUES ($1, $2, $3, $4) RETURNING *'
+//         console.log('writing to table')
+//         //safeQuery protects against SQL injection and merges $1 with safeQuery array
+//         client.query(SQL, safeQuery)
+//           .then(results => {
+//             response.status(200).send(results);
+//           })
+//           .catch(error => {response.status(500).send(error)});  
+//       })
   
-      .catch((e) => {
-        console.log(e)
-        response.status(500).send('So sorry, something went wrong.');
-      });
-    };
+//       .catch((e) => {
+//         console.log(e)
+//         response.status(500).send('So sorry, something went wrong.');
+//       });
+//     };
 
-  })
-  .catch( error => {response.status(500).send(error)
-  });
+//   })
+//   .catch( error => {response.status(500).send(error)
+//   });
   
   
-});
+// });
 
-app.use((error,request,response,next) => {
-    console.log(error);
-    response.status(500).send("Sorry, something went wrong")
 
-});
 
 
 // function Location(obj, searchQuery) {
