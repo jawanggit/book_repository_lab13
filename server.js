@@ -21,10 +21,21 @@ app.set('view engine', 'ejs');
 // In order to deal with a form POST ... we need to tell express that we care about it
 app.use(express.urlencoded({ extended: true }))
 
+// Match any file after the '/' in the folder called '/public' near our server
+// Static or non-changing content
+// Static is a file.
+app.use(express.static('./public'));
+
 
 //test route
-app.get('/hello',(req, resp)=>{  
-    resp.render('pages/index');
+app.get('/hello',(req, res)=>{  
+  res.render('pages/index');
+})
+
+app.get('/', (req,res) =>{
+  res.render('pages/index');
+
+
 })
 
 app.get(('/searches/new'), (req,resp)=>{
@@ -39,12 +50,19 @@ app.use((error,request,response,next) => {
 });
 
 app.post('/searches', (req, res) => {
-  // console.log(req.body);
-  const url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${req.body.search_entry}`
-  console.log(url)
+  // console.log(req)
+  console.log(req.body);
+  console.log(req.body.author);
+  console.log(req.body.title);
+  let url = ""
+  if (req.body.author){
+  url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${req.body.search_entry}`
+  }else {
+  url = `https://www.googleapis.com/books/v1/volumes?q=intitle:${req.body.search_entry}`
+  }
   superagent.get(url)
   .then(data =>{
-      // console.log(data.body.items[0].imageLinks.thumbnail)
+      
       let output = data.body.items.map(object =>{
         return new BookInfo(object)
       });
@@ -55,19 +73,18 @@ app.post('/searches', (req, res) => {
   .catch((e) => {
     console.log(e)
     res.render('pages/error');
-    // res.status(500).send('So sorry, issue with post');
   });
  
 });
 
 
 function BookInfo(data){
-  this.title = data.volumeInfo.title
-  this.image = data.volumeInfo.imageLinks.thumbnail
-  this.author = data.volumeInfo.authors[0]
-  this.description = data.volumeInfo.description
-  this.isbn = data.volumeInfo.industryIdentifiers[0].identifier
-  this.bookshelf = data.volumeInfo.categories[0] 
+  this.title = typeof(data.volumeInfo.title) !== 'undefined' ?  (data.volumeInfo.title) : ""
+  this.image = typeof(data.volumeInfo.imageLinks.thumbnail) !== 'undefined' ? (data.volumeInfo.imageLinks.thumbnail) : `https://i.imgur.com/J5LVHEL.jpg`
+  this.author = typeof(data.volumeInfo.authors) !== 'undefined' ? data.volumeInfo.authors[0] : ""
+  this.description = typeof(data.volumeInfo.description) !== 'undefined' ? data.volumeInfo.description : ""
+  this.isbn = typeof(data.volumeInfo.industryIdentifiers) !=='undefined' ? data.volumeInfo.industryIdentifiers[0].identifier : ""
+  this.bookshelf = typeof(data.volumeInfo.categories) !=='undefined' ? data.volumeInfo.categories[0] : "";
 }
 
 
