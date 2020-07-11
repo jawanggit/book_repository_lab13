@@ -44,33 +44,38 @@ app.post('/searches', (req, res) => {
   console.log(url)
   superagent.get(url)
   .then(data =>{
-      console.log(data.body)
-      // return new BookInfo(data)
-   
+      // console.log(data.body.items[0].imageLinks.thumbnail)
+      let output = data.body.items.map(object =>{
+        return new BookInfo(object)
+      });
+      console.log(output)
     
-    res.status(200).send("Hello");
+    res.render('pages/searches/show', {info:output});
   })
   .catch((e) => {
     console.log(e)
-    res.status(500).send('So sorry, issue with post');
+    res.render('pages/error');
+    // res.status(500).send('So sorry, issue with post');
   });
  
 });
 
 
 function BookInfo(data){
-  this.title = data.items[0].volumeInfo.title
-  this.image = data.items[0].imageLinks.thumbnail
-  this.author = data.items[0].volumeInfo.authors[0]
-  this.description = data.items[0].volumeInfo.description
-  this.isbn = data.items[0].volumeInfo.industryIdentifiers[0].identifier
-  this.bookshelf = data.items[0].volumeInfo.categories[0] //Fiction
+  this.title = data.volumeInfo.title
+  this.image = data.volumeInfo.imageLinks.thumbnail
+  this.author = data.volumeInfo.authors[0]
+  this.description = data.volumeInfo.description
+  this.isbn = data.volumeInfo.industryIdentifiers[0].identifier
+  this.bookshelf = data.volumeInfo.categories[0] 
 }
 
 
 app.listen(PORT, () =>{
   console.log(`Server is up on port ${PORT}.`);
 })
+
+
 
 // //create a SQL client connection
 // const client = new pg.Client(process.env.DATABASE_URL);
