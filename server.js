@@ -14,6 +14,20 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 
+//create a SQL client connection
+const client = new pg.Client(process.env.DATABASE_URL);
+client.on('error', err => {throw err;});
+
+client.connect()
+  .then( () => {
+    app.listen(PORT, () => {
+      console.log(`Server is up on port ${PORT}.`);
+    });
+  })
+  .catch(err => {
+    throw `PG startup error: ${err.message}`;
+  })
+
 //sets the default folder to ./views folder
 app.set('view engine', 'ejs');
 
@@ -28,14 +42,10 @@ app.use(express.static('./public'));
 
 
 //test route
+app.get('/', getData)
+
 app.get('/hello',(req, res)=>{  
   res.render('pages/index');
-})
-
-app.get('/', (req,res) =>{
-  res.render('pages/index');
-
-
 })
 
 app.get(('/searches/new'), (req,resp)=>{
@@ -77,6 +87,27 @@ app.post('/searches', (req, res) => {
  
 });
 
+///Helper Functions
+
+function getData(req, res){
+  let SQL = 'SELECT * from books;';
+  return client.query(SQL)
+  .then(results => {
+    let count = results.rows.length
+    console.log(count)
+    res.render('pages/index', { results: results.rows, count:count})
+  })
+  .catch(handleError);
+} 
+
+
+function handleError(error, res) {
+  console.log(error)
+  res.render('pages/error')
+}
+
+
+
 
 function BookInfo(data){
   this.title = typeof(data.volumeInfo.title) !== 'undefined' ?  (data.volumeInfo.title) : ""
@@ -84,13 +115,13 @@ function BookInfo(data){
   this.author = typeof(data.volumeInfo.authors) !== 'undefined' ? data.volumeInfo.authors[0] : ""
   this.description = typeof(data.volumeInfo.description) !== 'undefined' ? data.volumeInfo.description : ""
   this.isbn = typeof(data.volumeInfo.industryIdentifiers) !=='undefined' ? data.volumeInfo.industryIdentifiers[0].identifier : ""
-  this.bookshelf = typeof(data.volumeInfo.categories) !=='undefined' ? data.volumeInfo.categories[0] : "";
+  // this.bookshelf = typeof(data.volumeInfo.categories) !=='undefined' ? data.volumeInfo.categories[0] : "";
 }
 
 
-app.listen(PORT, () =>{
-  console.log(`Server is up on port ${PORT}.`);
-})
+// app.listen(PORT, () =>{
+//   console.log(`Server is up on port ${PORT}.`);
+// })
 
 
 

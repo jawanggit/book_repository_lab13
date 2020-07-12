@@ -3,12 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
+    <title>Saved Books</title>
     <link rel="stylesheet" href="/styles/base.css" />
 </head>
 <body>
-    <h1>Home</h1>
-    <button>Search the Google Books API</button>
+    <h1> <%= count %> Saved Books</h1>
+    
+    
+    
+        <% results.forEach(object =>{ %>
+            <img src = <%= object.image %>>
+            <div> 
+                <%= object.title %>
+            </div>
+            <div>
+                <%= object.author %>
+            </div>
+        <% }) %>
+    
+        <button>View Details</button>
+
 
 </body>
 </html>
