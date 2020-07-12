@@ -43,6 +43,7 @@ app.use(express.static('./public'));
 
 //test route
 app.get('/', getData)
+app.get('/bookds/:id', getDetailHandler);
 
 app.get('/hello',(req, res)=>{  
   res.render('pages/index');
@@ -106,6 +107,17 @@ function handleError(error, res) {
   res.render('pages/error')
 }
 
+function getDetailHandler(req, res){
+  console.log(req.params)
+  let SQL_details = `SELECT * FROM books WHERE id = $1`;
+  let param = [req.params.task_id];
+
+  client.query(SQL_details, param)
+    .then(results => {
+      console.log(results.rows[0]);
+      res.render('./pages/books/details', {details: results.rows[0]})
+    })
+}
 
 
 
