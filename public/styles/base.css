@@ -2,3 +2,24 @@ body {
     background: grey;
   }
   
+  main{
+    display: flex;
+    flex: direction column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    text-align: center;
+    align-items: center;
+  }
+
+  h2{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  h3{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+  }
+
+  h4{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }

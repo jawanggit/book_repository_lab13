@@ -1,0 +1,32 @@
+@media screen and (max-width: 480) {
+}
+
+
+
+li{
+    box-sizing: border-box;
+    border: 4px black;
+    padding: 20 px;
+}
+
+
+
+@media screen and (min-width: 480px) {
+
+}
+
+
+h1{
+    font-size: 50pt;
+}
+
+li{
+    max-width: 780px;
+    box-sizing: border-box;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+ul{
+    align-items: center;
+}
