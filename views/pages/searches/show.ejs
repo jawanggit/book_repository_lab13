@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <html lang="en">
-        <head>
-            <title>Search Results</title>
-            <link rel="stylesheet" href="/styles/base.css" />
-        </head>
+    <head>
+        <%- include('../layouts/head') %>  <!-- partial -->
+    </head>
+
+    <header>
+        <%- include('../layouts/header') %>
+    </header>
+        
         <body>
             <h1>Search Results</h1>
         
@@ -21,6 +24,18 @@
                 <div>
                     <%= object.description %>
                 </div>
+                
+                <form method = "POST" action = "/books">
+                        <input type = "hidden" name = "title" value = "<%= object.title %>">
+                        <input type = "hidden" name = "author" value = "<%= object.author %>">
+                        <input type = "hidden" name = "description" value = "<%= object.description %>">
+                        <input type = "hidden" name = "image" value = "<%= object.image %>">
+                        <div>
+                            <button type = "submit">Select this Book</button>
+                        </div>
+                </form>
+                
+
             <% }) %>
         </body> 
         

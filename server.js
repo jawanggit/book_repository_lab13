@@ -41,9 +41,11 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static('./public'));
 
 
-//test route
+//routes////////////////
+
 app.get('/', getData)
-app.get('/bookds/:id', getDetailHandler);
+app.get('/books/:id', getDetailHandler);
+app.post('/books', addBook);
 
 app.get('/hello',(req, res)=>{  
   res.render('pages/index');
@@ -62,9 +64,9 @@ app.use((error,request,response,next) => {
 
 app.post('/searches', (req, res) => {
   // console.log(req)
-  console.log(req.body);
-  console.log(req.body.author);
-  console.log(req.body.title);
+  // console.log(req.body);
+  // console.log(req.body.author);
+  // console.log(req.body.title);
   let url = ""
   if (req.body.author){
   url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${req.body.search_entry}`
@@ -77,7 +79,7 @@ app.post('/searches', (req, res) => {
       let output = data.body.items.map(object =>{
         return new BookInfo(object)
       });
-      console.log(output)
+      // console.log(output)
     
     res.render('pages/searches/show', {info:output});
   })
@@ -90,11 +92,25 @@ app.post('/searches', (req, res) => {
 
 ///Helper Functions
 
+function addBook(req,res){
+  console.log(req.body.title)
+  console.log(req.body.author)
+  let SQL_book= 'INSERT INTO books (title, author, description, image) VALUES ($1, $2, $3, $4) RETURNING *'
+  let param = [req.body.title, req.body.author, req.body.description, req.body.image];
+
+  client.query(SQL_book, param)
+    .then(()=>{
+      res.redirect('/')
+    })
+
+}
+
 function getData(req, res){
   let SQL = 'SELECT * from books;';
   return client.query(SQL)
   .then(results => {
     let count = results.rows.length
+    console.log(results.rows)
     console.log(count)
     res.render('pages/index', { results: results.rows, count:count})
   })
@@ -110,15 +126,14 @@ function handleError(error, res) {
 function getDetailHandler(req, res){
   console.log(req.params)
   let SQL_details = `SELECT * FROM books WHERE id = $1`;
-  let param = [req.params.task_id];
+  let param = [req.params.id];
 
-  client.query(SQL_details, param)
+  return client.query(SQL_details, param)
     .then(results => {
-      console.log(results.rows[0]);
       res.render('./pages/books/details', {details: results.rows[0]})
     })
+    .catch(handleError);
 }
-
 
 
 function BookInfo(data){
