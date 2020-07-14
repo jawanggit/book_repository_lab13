@@ -1,33 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Details Page</title>
-    <link rel="stylesheet" href="/styles/base.css" />
-</head>
-<body>
-    <h1> Book Details</h1>
-       
-            <img src = <%= details.image %> >
-            <div> 
-                <%= details.title %>
-            </div>
-            <div>
-                <%= details.author %>
-            </div>
-            <div>
-                <%= details.description %>
-            </div>
-            <div>
-                <li>ISBN: <%= details.isbn %></li>
-            </div>
-            <div>
-                <li>Bookshelf: <%= details.bookshelf %></li>
-            </div>
-    
-        <button>View Details</button>
+    <head>
+        <%- include('../layouts/head') %>  <!-- partial -->
+    </head>
+
+    <header>
+        <%- include('../layouts/header') %>
+    </header>
+    <body>
+        <main>
+            <section>   
+        
+                <img src = <%= details.image %> >
+                <div> 
+                    <%= details.title %>
+                </div>
+                <div>
+                    <%= details.author %>
+                </div>
+                <div>
+                    <%= details.description %>
+                </div>
+                <div>
+                    <li>ISBN: <%= details.isbn %></li>
+                </div>
+                <div>
+                    <li>Bookshelf: <%= details.bookshelf %></li>
+                </div>
+
+            </section>
+            
+        </main>
 
 
-</body>
+    </body>
 </html>
