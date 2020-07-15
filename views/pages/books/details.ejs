@@ -28,10 +28,47 @@
                     <li>Bookshelf: <%= details.bookshelf %></li>
                 </div>
 
+                <!-- <%- include('edits.ejs')%> -->
+                
+                <form>
+                    <button id= "updateBtn"> update book</button>
+                </form>
+                
+                
+                <form>
+                    <button id ="deleteBtn"> delete book</button>
+                </form>
+                
+                <!--updateBtn form-->
+                <div id = "updateContent" class = "updateMsg">
+                    <span class="close">&times;</span>
+                    <%- include('edits.ejs')%>
+                </div>
+
+
             </section>
             
         </main>
+        <script>
+            var updateBtn = document.getElementById("updateBtn")
+            var updateContent = document.getElementById('updateContent')
+            var span = document.getElementsByClassName("close")[0];
+            
+            updateBtn.onclick = function() {
+                updateContent.style.display = "block"
+                event.preventDefault()
+            }
 
+            span.onclick = function() {
+                updateContent.style.display = "none";
+            }
+
+            window.onclick = function(event) {
+                if (event.target == updateContent) {
+                  updateContent.style.display = "none";
+                }
+              }
+        </script>
 
     </body>
 </html>
