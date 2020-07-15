@@ -1,34 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <%- include('./layouts/head') %>
-    </head>
-
-    <header>
-        <%- include('./layouts/header') %>
-    </header>
-
+    <%- include('./layouts/head') %>
+    
     <body>
+    
+    <%- include('./layouts/header') %>
+    <main> 
         <h1> <%= count %> Saved Books</h1>
         
-        
             <% results.forEach(object =>{ %>
-                <div>
-                    <img src = <%= object.image %>>
+                <div class = "pic">
+                    <img class = "image" src = <%= object.image %>>
                 </div>
                 
-                <div> 
+                <div class = "title"> 
                     <%= object.title %>
                 </div>
 
-                <div>
+                <div class = "author">
                     <%= object.author %>
                 </div>
             
-        
-        <a href = "/books/<%= object.id %>">View Details</a>
+
+        <a class = "details" href = "/books/<%= object.id %>">View Details</a>
+       
 
         <% }) %>
-    
+    </main>
     </body>
 </html>
