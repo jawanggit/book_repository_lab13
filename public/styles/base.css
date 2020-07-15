@@ -1,14 +1,52 @@
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.image{
+  width:150px;
+}
+
+.pic{
+  width:150px;
+  background:white;
+  padding:3px;
+}
+.author{
+color: darkgray;
+font-size: small;
+}
+
+.title{
+  color: whitesmoke;
+  font-size: large;
+}
+
 body {
     background: grey;
-  }
-  
-  main{
     display: flex;
-    flex: direction column;
+    flex-direction: column;
     flex-wrap: nowrap;
     justify-content: space-between;
     text-align: center;
     align-items: center;
+    margin: 50px;
+  }
+
+  main {
+    background: lightgrey;
+    padding: 30px;
+  }
+
+  .details {
+  width: 150px;
+  height: 35px;
+  background-color: black;
+  color: white;
+  
+  
+
   }
 
   h2{

@@ -63,11 +63,7 @@ app.use((error,request,response,next) => {
 });
 
 app.post('/searches', (req, res) => {
-  // console.log(req)
-  // console.log(req.body);
-  // console.log(req.body.author);
-  // console.log(req.body.title);
-  let url = ""
+    let url = ""
   if (req.body.author){
   url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${req.body.search_entry}`
   }else {
