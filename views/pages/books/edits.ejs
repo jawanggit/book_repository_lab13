@@ -1,4 +1,4 @@
-<form class = "modal-content" method="post">
+<form class = "modal-content" action="/books/<%= details.id %>?_method=PUT" method="post">
     <input type="hidden" name="image" value="<%= details.image %>" placeholder="Image Name:"/>
     <input type="text" name="title" value="<%= details.title %>" placeholder="Book Name:"/>
     <input type="text" name="author" value="<%= details.author %>" placeholder="Author Name:"/>

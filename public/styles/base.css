@@ -75,11 +75,22 @@ body {
     text-align: center;
     align-items: center;
     margin: 50px;
+    
+
   }
+
+header {
+  background: black;
+  color: white;
+  width: 274px;
+  
+}
 
   main {
     background: lightgrey;
     padding: 30px;
+    border: 2px solid black;
+    width: 210px;
   }
 
   .details {

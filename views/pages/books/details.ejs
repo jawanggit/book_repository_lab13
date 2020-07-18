@@ -27,15 +27,11 @@
                 <div>
                     <li>Bookshelf: <%= details.bookshelf %></li>
                 </div>
-
-                <!-- <%- include('edits.ejs')%> -->
+                <section>
+                <button id= "updateBtn"> update book</button>
+                </section>
                 
-                <form>
-                    <button id= "updateBtn"> update book</button>
-                </form>
-                
-                
-                <form>
+                <form action = "/books/<%= details.id %>?_method=delete" method="post">
                     <button id ="deleteBtn"> delete book</button>
                 </form>
                 

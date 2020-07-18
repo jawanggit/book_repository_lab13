@@ -8,6 +8,9 @@ const pg = require('pg')
 const superagent = require('superagent');
 const morgan = require('morgan');
 const PORT = process.env.PORT;
+const methodOverride = require('method-override');
+
+
 
 //Create an "instance" of express as our app
 const app = express();
@@ -35,25 +38,30 @@ app.set('view engine', 'ejs');
 // In order to deal with a form POST ... we need to tell express that we care about it
 app.use(express.urlencoded({ extended: true }))
 
+
+app.use(methodOverride('_method'));
+
 // Match any file after the '/' in the folder called '/public' near our server
 // Static or non-changing content
 // Static is a file.
 app.use(express.static('./public'));
 
 
+
 //routes////////////////
-
-app.get('/', getData)
-app.get('/books/:id', getDetailHandler);
-app.post('/books', addBook);
-
 app.get('/hello',(req, res)=>{  
   res.render('pages/index');
 })
 
-app.get(('/searches/new'), (req,resp)=>{
-  resp.render('pages/searches/new')
-})
+app.get('/', getData)
+app.get('/books/:id', getDetailHandler);
+app.get(('/searches/new'), findBook);
+
+app.put('/books/:id', updateBook);
+app.delete('/books/:id',deleteBook);
+
+app.post('/books', addBook);
+app.post('/searches', APIcall);
 
 
 app.use((error,request,response,next) => {
@@ -62,8 +70,33 @@ app.use((error,request,response,next) => {
 
 });
 
-app.post('/searches', (req, res) => {
-    let url = ""
+
+
+
+///Helper Functions
+
+function deleteBook(req,res) {
+  
+  let SQL = 'DELETE from books WHERE id=$1;';
+  let param = [req.params.id]
+
+  client.query(SQL, param)
+    .then(()=>{
+      res.redirect('/')
+    }).catch(error => console.log(error));
+}
+
+function getBookshelfList(req, res) {
+  let SQL = 'SELECT DISTINCT bookshelf FROM books;';
+  return client.query(SQL);
+}
+
+function findBook(req,res){
+  res.status(200).render('pages/searches/new')
+}
+
+function APIcall(req, res){
+  let url = ""
   if (req.body.author){
   url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${req.body.search_entry}`
   }else {
@@ -75,7 +108,7 @@ app.post('/searches', (req, res) => {
       let output = data.body.items.map(object =>{
         return new BookInfo(object)
       });
-      // console.log(output)
+
     
     res.render('pages/searches/show', {info:output});
   })
@@ -83,34 +116,34 @@ app.post('/searches', (req, res) => {
     console.log(e)
     res.render('pages/error');
   });
- 
-});
 
-///Helper Functions
+};
 
 function addBook(req,res){
-  console.log(req.body.title)
-  console.log(req.body.author)
-  let SQL_book= 'INSERT INTO books (title, author, description, image) VALUES ($1, $2, $3, $4) RETURNING *'
-  let param = [req.body.title, req.body.author, req.body.description, req.body.image];
+
+  let SQL_book= 'INSERT INTO books (title, author, description, image, isbn, bookshelf) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *'
+  let param = [req.body.title, req.body.author, req.body.description, req.body.image, req.body.isbn, req.body.bookshelf];
 
   client.query(SQL_book, param)
-    .then(()=>{
-      res.redirect('/')
+    .then(results=>{
+      res.redirect(`/books/${results.rows[0].id}`)
     })
+    .catch(handleError)
 
 }
 
-function getData(req, res){
-  let SQL = 'SELECT * from books;';
-  return client.query(SQL)
-  .then(results => {
-    let count = results.rows.length
-    console.log(results.rows)
-    console.log(count)
-    res.render('pages/index', { results: results.rows, count:count})
+function getData(req, res) {
+  getBookshelfList()
+  .then(bookshelfList=>{
+    let SQL = 'SELECT * from books;';
+    return client.query(SQL)
+    .then(results => {
+      console.log(results.rows)
+      let count = results.rows.length
+      res.render('pages/index', { results: results.rows, count:count})
+    })
+    .catch(handleError);
   })
-  .catch(handleError);
 } 
 
 
@@ -131,14 +164,28 @@ function getDetailHandler(req, res){
     .catch(handleError);
 }
 
+function updateBook(req, res){
+  console.log(req.body);
+  let SQL = `UPDATE books SET title = $1, author = $2, description = $3, isbn = $4, bookshelf = $5;`
+  let params = [req.body.title, req.body.author, req.body.description, req.body.isbn, req.body.bookshelf];
+  console.log("updated SQL databse")
+
+  client.query(SQL, params)
+    .then( results => {
+      res.status(200).redirect(`/books/${req.params.id}`);
+    })
+    .catch(handleError);
+}
+
+
 
 function BookInfo(data){
-  this.title = typeof(data.volumeInfo.title) !== 'undefined' ?  (data.volumeInfo.title) : ""
+  this.title = typeof(data.volumeInfo.title) !== 'undefined' ?  (data.volumeInfo.title) : "Title unavailable"
   this.image = typeof(data.volumeInfo.imageLinks.thumbnail) !== 'undefined' ? (data.volumeInfo.imageLinks.thumbnail) : `https://i.imgur.com/J5LVHEL.jpg`
-  this.author = typeof(data.volumeInfo.authors) !== 'undefined' ? data.volumeInfo.authors[0] : ""
-  this.description = typeof(data.volumeInfo.description) !== 'undefined' ? data.volumeInfo.description : ""
-  this.isbn = typeof(data.volumeInfo.industryIdentifiers) !=='undefined' ? data.volumeInfo.industryIdentifiers[0].identifier : ""
-  // this.bookshelf = typeof(data.volumeInfo.categories) !=='undefined' ? data.volumeInfo.categories[0] : "";
+  this.author = typeof(data.volumeInfo.authors) !== 'undefined' ? data.volumeInfo.authors[0] : "Author unavailable"
+  this.description = typeof(data.volumeInfo.description) !== 'undefined' ? data.volumeInfo.description : "Description unavailable"
+  this.isbn = typeof(data.volumeInfo.industryIdentifiers) !=='undefined' ? data.volumeInfo.industryIdentifiers[0].identifier : "ISBN unavailable"
+  this.bookshelf = typeof(data.volumeInfo.categories) !=='undefined' ? data.volumeInfo.categories[0] : "Undefined";
 }
 
 
