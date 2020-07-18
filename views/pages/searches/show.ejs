@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
         <%- include('../layouts/head') %>  <!-- partial -->
-    </head>
 
-    <header>
-        <%- include('../layouts/header') %>
-    </header>
-        
         <body>
+        
+        <%- include('../layouts/header') %>
+        
+        <main>
             <h1>Search Results</h1>
         
         
@@ -30,6 +28,8 @@
                         <input type = "hidden" name = "author" value = "<%= object.author %>">
                         <input type = "hidden" name = "description" value = "<%= object.description %>">
                         <input type = "hidden" name = "image" value = "<%= object.image %>">
+                        <input type = "hidden" name = "isbn" value = "<%= object.isbn %>">
+                        <input type = "hidden" name = "bookshelf" value = "<%= object.bookshelf %>">
                         <div>
                             <button type = "submit">Select this Book</button>
                         </div>
@@ -37,6 +37,8 @@
                 
 
             <% }) %>
+        </main>
+        
         </body> 
         
     </html>
